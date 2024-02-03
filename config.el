@@ -9,43 +9,9 @@
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/org/")
 
-(gud-tooltip-mode t)
+(setq auth-sources '("~/.authinfo"))
 
 (winner-mode t)
-(map! :map winner-mode-map
-      :leader
-      "<left>" #'winner-undo
-      "<right>" #'winner-redo)
-
-(use-package! crux
-  :bind (("M-o" . #'crux-smart-open-line-above)
-	 ("C-o" . #'crux-smart-open-line)))
-
-(use-package! goto-line-preview
-  :bind ([remap goto-line] . #'goto-line-preview))
-
-(map! :leader "SPC" #'yas-expand)
-
-(use-package! vundo
-  :bind (("C-x u" . #'vundo)))
-
-(use-package! projectile
-  :custom
-  (projectile-track-known-projects-automatically nil)
-  (projectile-auto-discover nil))
-
-(use-package! org-modern
-  :delight
-  :hook ((org-mode . org-modern-mode)
-	 (org-agenda-finalize . org-modern-agenda)))
-
-(use-package! company
-  :bind ([remap complete-symbol] . #'company-complete))
-
-(map! "C-|" (lambda () (interactive)
-              (duplicate-line)
-              (forward-line)
-              (doom/forward-to-last-non-comment-or-eol)))
 
 (defun my-projectile-run-project (&optional prompt)
   (interactive "P")
@@ -61,12 +27,64 @@
              prompt)))
     (projectile-compile-project prompt)))
 
+;;; Keybindings
 
 (map! :map c-mode-map
       "C-c C-c" #'my-projectile-compile-project
       "C-c C-v" #'my-projectile-run-project)
 
-(setq auth-sources '("~/.authinfo"))
+(map! :map global-map
+      :leader
+      "<left>" #'winner-undo
+      "<right>" #'winner-redo)
 
-(use-package! forge
-  :after magit)
+(map! :leader "SPC" #'yas-expand)
+
+(map! "C-|" (lambda () (interactive)
+              (duplicate-line)
+              (forward-line)
+              (doom/forward-to-last-non-comment-or-eol)))
+
+;;; Packages
+
+(use-package! crux
+  :bind (:map global-map
+              ("M-o" . #'crux-smart-open-line-above)
+	      ("C-o" . #'crux-smart-open-line)))
+
+(use-package! goto-line-preview
+  :bind (:map global-map
+              ([remap goto-line] . #'goto-line-preview)))
+
+(use-package! vundo
+  :bind (:map global-map
+              ("C-x u" . #'vundo)))
+
+(use-package! projectile
+  :custom
+  (projectile-track-known-projects-automatically nil)
+  (projectile-auto-discover nil))
+
+(use-package! org-modern
+  :delight
+  :hook ((org-mode . org-modern-mode)
+	 (org-agenda-finalize . org-modern-agenda)))
+
+(use-package! company
+  :bind (:map global-map
+              ([remap complete-symbol] . #'company-complete))
+  :custom
+  (company-idle-delay nil)
+  (company-frontends '(company-pseudo-tooltip-frontend))
+  (company-tooltip-align-annotations t)
+  (company-tooltip-limit 6)
+  (company-tooltip-minimum 6))
+
+(use-package! lsp-java
+  :bind
+  (:map lsp-mode-map
+        (("M-RET" . #'lsp-execute-code-action)
+         ("C-h h" . #'lsp-ui-doc-glance)))
+  :custom
+  (lsp-java-save-actions-organize-imports t)
+  (lsp-enable-snippet nil))
