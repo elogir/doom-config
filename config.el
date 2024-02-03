@@ -81,10 +81,19 @@
   (company-tooltip-minimum 6))
 
 (use-package! lsp-java
+  :init
+  (setq lombok-library-path (concat doom-data-dir "lombok.jar"))
   :bind
   (:map lsp-mode-map
         (("M-RET" . #'lsp-execute-code-action)
-         ("C-h h" . #'lsp-ui-doc-glance)))
+         ("C-h h" . #'lsp-ui-doc-glance)
+         ("C-c C-c" . #'my-projectile-compile-project)
+         ("C-c C-v" . #'my-projectile-run-project)))
   :custom
+  (lsp-java-vmargs '("-XX:+UseParallelGC" "-XX:GCTimeRatio=4" "-XX:AdaptiveSizePolicyWeight=90" "-Dsun.zip.disableMemoryMapping=true" "-Xmx4G" "-Xms100m"))
   (lsp-java-save-actions-organize-imports t)
-  (lsp-enable-snippet nil))
+  (lsp-enable-snippet nil)
+  :config
+  (unless (file-exists-p lombok-library-path)
+    (url-copy-file "https://projectlombok.org/downloads/lombok.jar" lombok-library-path))
+  (push (concat "-javaagent:" (expand-file-name lombok-library-path)) lsp-java-vmargs))
