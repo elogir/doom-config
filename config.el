@@ -63,7 +63,9 @@
 (use-package! projectile
   :custom
   (projectile-track-known-projects-automatically nil)
-  (projectile-auto-discover nil))
+  (projectile-auto-discover nil)
+  :config
+  (push ".class" projectile-globally-ignored-file-suffixes))
 
 (use-package! org-modern
   :delight
@@ -97,3 +99,8 @@
   (unless (file-exists-p lombok-library-path)
     (url-copy-file "https://projectlombok.org/downloads/lombok.jar" lombok-library-path))
   (push (concat "-javaagent:" (expand-file-name lombok-library-path)) lsp-java-vmargs))
+
+(use-package! treemacs
+  :custom
+  (treemacs-collapse-dirs 4)
+  (treemacs-indentation 1))
