@@ -45,6 +45,8 @@
               (forward-line)
               (doom/forward-to-last-non-comment-or-eol)))
 
+(map! "M-0" #'treemacs-select-window)
+
 ;;; Packages
 
 (use-package! crux
@@ -94,7 +96,6 @@
   :custom
   (lsp-java-vmargs '("-XX:+UseParallelGC" "-XX:GCTimeRatio=4" "-XX:AdaptiveSizePolicyWeight=90" "-Dsun.zip.disableMemoryMapping=true" "-Xmx4G" "-Xms100m"))
   (lsp-java-save-actions-organize-imports t)
-  (lsp-enable-snippet nil)
   :config
   (unless (file-exists-p lombok-library-path)
     (url-copy-file "https://projectlombok.org/downloads/lombok.jar" lombok-library-path))
