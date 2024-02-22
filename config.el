@@ -47,6 +47,8 @@
 
 (map! "M-0" #'treemacs-select-window)
 
+(map! :leader "g" #'gptel-menu)
+
 ;;; Packages
 
 (use-package! crux
@@ -105,3 +107,30 @@
   :custom
   (treemacs-collapse-dirs 4)
   (treemacs-indentation 1))
+
+(use-package! gptel
+  :custom
+  (gptel-api-key "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")
+  (gptel-default-mode 'org-mode)
+  :config
+  (add-hook 'gptel-post-stream-hook 'gptel-auto-scroll)
+  (add-hook 'gptel-post-response-functions 'gptel-end-of-response))
+
+(add-to-list 'load-path "/home/rigole/Documents/Git-Repos/gptel-extensions.el")
+(require 'gptel-extensions)
+
+(use-package! v-mode
+  :config
+  :bind
+  (:map v-mode-map
+        ("M-z" . v-menu))
+  :mode ("\\(\\.v?v\\|\\.vsh\\)$" . 'v-mode))
+
+(with-eval-after-load 'lsp-mode
+  (add-to-list 'lsp-language-id-configuration
+               '(v-mode . "v"))
+
+  (lsp-register-client
+   (make-lsp-client :new-connection (lsp-stdio-connection "v-analyzer")
+                    :activation-fn (lsp-activate-on "v")
+                    :server-id 'v-analyzer)))
