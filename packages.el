@@ -4,9 +4,9 @@
 (package! crux)
 (package! goto-line-preview)
 (package! org-modern)
-(package! forge)
-(package! dap-mode
-  :recipe
-  (:host github :repo "elogir/dap-mode"))
-(package! gptel)
+; (package! forge)
+;(package! dap-mode
+;  :recipe
+;  (:host github :repo "elogir/dap-mode"))
+;(package! gptel)
 (package! v-mode)
