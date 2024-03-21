@@ -10,3 +10,5 @@
   (:host github :repo "elogir/dap-mode"))
 (package! gptel)
 (package! v-mode)
+(package! realgud)
+(package! realgud-lldb)

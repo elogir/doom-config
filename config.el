@@ -134,3 +134,71 @@
    (make-lsp-client :new-connection (lsp-stdio-connection "v-analyzer")
                     :activation-fn (lsp-activate-on "v")
                     :server-id 'v-analyzer)))
+
+(use-package! realgud)
+(use-package! realgud-lldb)
+
+(add-to-list 'load-path "~/.config/emacs/site-lisp")
+;; (load-library "doxygen-highlight.el")
+(load-library "gendoxy.el")
+(autoload 'tiger-mode "tiger" "Load tiger-mode" t)
+(add-to-list 'auto-mode-alist '("\.ti[gh]$" . tiger-mode))
+
+(defface doxygen-verbatim-face
+  '((default :inherit default))
+  "Face used to show Doxygen block regions"
+  :group 'font-lock-faces)
+
+(defface doxygen-match-face
+  '((default :inherit default)
+    (t :underline t))
+  "Face used to show Doxygen region start end commands"
+  :group 'font-lock-faces)
+
+(defconst custom-font-lock-doc-comments
+  `(
+    (,(concat
+       "\\(?:"
+       "[\\@][a-z]+"
+       "\\|"
+       "[\\@]\\(?:\\\\\\|@\\|&\\|#\\|<\\|>\\|%\\|\"\\|\\.\\|::\\||\\|---?\\|~[a-z]*\\)"
+       "\\)")
+     0 ,c-doc-markup-face-name prepend nil)
+    (,(concat
+       "\\(?:"
+       "[A-Za-z_0-9]+(\\([A-Za-z_0-9:&*, ]*)\\)?"
+       "\\|"
+       "\\(?:[A-Za-z_0-9]+\\|\\s-\\)\\(?:::\\|#\\)~?[A-Za-z_0-9]+(?\\(?:[A-Za-z_0-9:&*, \t]*)\\)?"
+       "\\|"
+       "[A-Za-z_0-9/]+\\.\\(?:cpp\\|cxx\\|cc\\|c\\|hpp\\|hxx\\|hh\\|h\\)"
+       "\\)")
+     0 font-lock-function-name-face prepend nil)
+    ("https?://[^[:space:][:cntrl:]]+"
+     0 font-lock-keyword-face prepend nil)
+    (,(concat "</?\\sw"
+              "\\("
+              (concat "\\sw\\|\\s \\|[=\n\r*.:]\\|"
+                      "\"[^\"]*\"\\|'[^']*'")
+              "\\)*>")
+     0 ,c-doc-markup-face-name prepend nil)
+    ("[A-Za-z0-9.]+@[A-Za-z0-9_]+\\.[A-Za-z0-9_.]+"
+     0 font-lock-keyword-face prepend nil)
+    ("\"[^\"[:cntrl:]]+\""
+     0 ,c-doc-face-name prepend nil)
+
+    ("[^\\@]\\([\\@]f.+?[\\@]f\\$\\)"
+     1 'doxygen-verbatim-face prepend nil)
+    (,(concat
+       "[^\\@]"
+       "\\([\\@]\\(?:verbatim\\|endverbatim\\|code\\|endcode\\|f{\\|f\\[\\|f}\\|f]\\)\\)")
+     1 'doxygen-match-face prepend nil)
+    ))
+
+(defconst custom-font-lock-keywords
+  `((,(lambda (limit)
+        (c-font-lock-doc-comments "/\\(//\\|\\*[\\*!][^\\*!]\\)"
+            limit custom-font-lock-doc-comments)))))
+
+(setq-default c-doc-comment-style (quote (custom)))
+
+(setq apheleia-mode-alist '(("\\.ll\\'" . nil) ("\\.yy\\'" . nil)))
