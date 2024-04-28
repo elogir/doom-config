@@ -33,6 +33,15 @@
       "C-c C-c" #'my-projectile-compile-project
       "C-c C-v" #'my-projectile-run-project)
 
+(map! :map c++-mode-map
+      "C-c C-c" #'my-projectile-compile-project
+      "C-c C-v" #'my-projectile-run-project)
+
+(map! :map rjsx-mode-map
+      "C-c C-c" #'my-projectile-compile-project
+      "C-c C-v" #'my-projectile-run-project)
+
+
 (map! :map global-map
       :leader
       "<left>" #'winner-undo
@@ -82,13 +91,14 @@
 
 (use-package! company
   :bind (:map global-map
-              ([remap complete-symbol] . #'company-complete))
-  :custom
-  (company-idle-delay nil)
-  (company-frontends '(company-pseudo-tooltip-frontend))
-  (company-tooltip-align-annotations t)
-  (company-tooltip-limit 6)
-  (company-tooltip-minimum 6))
+              (([remap complete-symbol] . #'company-complete)
+               ("M-`" . #'company-complete))))
+:custom
+(company-idle-delay nil)
+(company-frontends '(company-pseudo-tooltip-frontend))
+(company-tooltip-align-annotations t)
+(company-tooltip-limit 6)
+(company-tooltip-minimum 6))
 
 (use-package! lsp-java
   :init
@@ -237,6 +247,7 @@
 
 (use-package! lsp-mode
   :hook (
+         (dockerfile-mode . lsp)
          (c-ts-mode . lsp)
          (c++-ts-mode . lsp)
          (lsp-mode . lsp-enable-which-key-integration))
@@ -264,39 +275,39 @@
   :hook (org-mode . aas-activate-for-major-mode)
   :config
   (aas-set-snippets 'org-mode
-    :cond #'texmathp
-    "/ens" '(yas "\\mathbb{$1} ")
-    "/fr" '(yas "\\frac{$1}{$2} ")
-    "_" '(yas "_{$1}")
-    "^" '(yas "^{$1}")
-    "dans" "\\in"
-    "Sigma" "\\Sigma"
-    "/pt" "\\forall "
-    "/ex" "\\exists "
-    "RR" "\\mathbb{R} "
-    "NN" "\\mathbb{N} "
-    "PP" "\\mathbb{P} "
-    "<=" "\\leq"
-    ">=" "\\geq"
-    "=>" "\\implies"
-    "->" "\\mapsto"
-    "iif" "\\Longleftrightarrow"
-    "/abs" '(yas "\\displaystyle\\left\\lvert $1 \\right\\rvert $0")
-    "/norme" '(yas "\\lVert $1 \\rVert")
-    "/inf" "\\infty"
-    "/lim" '(yas "\\underset{$1 \\to $2}{lim} $3 = $0")
-    "/dp" '(yas "\\frac{\\partial{$1}}{\\partial{$2}}")
-    "/dd" '(yas "\\frac{d$1}{d$2}")
-    "/t1" '(yas "\\text{$1} ")
-    "/t2" '(yas "\\quad\\text{$1}\\quad ")
-    "/t3" '(yas "\\qquad\\text{$1}\\qquad ")
-    "/pp" '(yas "\\left( $1 \\right)")
-    "~" "\\sim"
-    "/V" '(yas "\\sqrt{$1}")
-    "/int" '(yas "\\int_{$1}^{$2}$3d$4"))
+                    :cond #'texmathp
+                    "/ens" '(yas "\\mathbb{$1} ")
+                    "/fr" '(yas "\\frac{$1}{$2} ")
+                    "_" '(yas "_{$1}")
+                    "^" '(yas "^{$1}")
+                    "dans" "\\in"
+                    "Sigma" "\\Sigma"
+                    "/pt" "\\forall "
+                    "/ex" "\\exists "
+                    "RR" "\\mathbb{R} "
+                    "NN" "\\mathbb{N} "
+                    "PP" "\\mathbb{P} "
+                    "<=" "\\leq"
+                    ">=" "\\geq"
+                    "=>" "\\implies"
+                    "->" "\\mapsto"
+                    "iif" "\\Longleftrightarrow"
+                    "/abs" '(yas "\\displaystyle\\left\\lvert $1 \\right\\rvert $0")
+                    "/norme" '(yas "\\lVert $1 \\rVert")
+                    "/inf" "\\infty"
+                    "/lim" '(yas "\\underset{$1 \\to $2}{lim} $3 = $0")
+                    "/dp" '(yas "\\frac{\\partial{$1}}{\\partial{$2}}")
+                    "/dd" '(yas "\\frac{d$1}{d$2}")
+                    "/t1" '(yas "\\text{$1} ")
+                    "/t2" '(yas "\\quad\\text{$1}\\quad ")
+                    "/t3" '(yas "\\qquad\\text{$1}\\qquad ")
+                    "/pp" '(yas "\\left( $1 \\right)")
+                    "~" "\\sim"
+                    "/V" '(yas "\\sqrt{$1}")
+                    "/int" '(yas "\\int_{$1}^{$2}$3d$4"))
   (aas-set-snippets 'org-mode
-    ";i" '(yas "\\\\( $1 \\\\) $0")
-    ";e" '(yas "\\\\[ $1 \\\\] $0")))
+                    ";i" '(yas "\\\\( $1 \\\\) $0")
+                    ";e" '(yas "\\\\[ $1 \\\\] $0")))
 
 (use-package! yasnippet
   :hook ((lsp-mode . yas-minor-mode) (org-mode . yas-minor-mode))
