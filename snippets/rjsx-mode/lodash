@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: lodash
+# key: lodash
+# --
+
+import * as _ from "lodash";
