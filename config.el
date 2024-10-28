@@ -4,14 +4,11 @@
       doom-variable-pitch-font (font-spec :family "FiraMono Nerd Font" :size 19))
 
 (setq display-line-numbers-type 'relative)
-
-;; If you use `org' and don't want your org files in the default location below,
-;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/org/")
-
 (setq auth-sources '("~/.authinfo"))
 
-(load-theme 'doom-solarized-light t)
+;; (load-theme 'doom-solarized-light t)
+(setq doom-theme nil)
 
 (winner-mode t)
 (global-visual-line-mode t)
@@ -96,23 +93,26 @@
 
 (use-package! lsp-mode
   :hook ((rjsx-mode . lsp-mode)
+         (js-ts-mode . lsp-mode)
+         (v-mode . lsp-mode)
          (mhtml-mode . lsp-mode)
          (lsp-mode . lsp-enable-which-key-integration))
   :bind (:map lsp-mode-map
               ("M-RET" . #'lsp-execute-code-action))
   :custom
   (lsp-headerline-breadcrumb-enable t)
-  (lsp-inlay-hint-enable t)
   (lsp-javascript-display-enum-member-value-hints t)
   (lsp-javascript-display-parameter-name-hints t)
   (lsp-javascript-display-parameter-type-hints t)
   (lsp-javascript-display-property-declaration-type-hints t)
   (lsp-javascript-display-return-type-hints t)
   (lsp-javascript-display-parameter-name-hints "literals")
-  (lsp-javascript-display-variable-type-hints t)
-  :commands lsp)
+  (lsp-javascript-display-variable-type-hints t))
 
-(use-package! projectile)
+(use-package! projectile
+  :config
+  (add-to-list 'projectile-project-root-files-bottom-up "pubspec.yaml")
+  (add-to-list 'projectile-project-root-files-bottom-up "BUILD"))
 
 (use-package! yasnippet
   :hook ((lsp-mode . yas-minor-mode) (org-mode . yas-minor-mode))
@@ -122,5 +122,119 @@
   :config
   (yas-reload-all))
 
-(use-package rjsx-mode
+(use-package! rjsx-mode
   :hook (rjsx-mode . subword-mode))
+
+(use-package! js-ts-mode
+  :hook (js-ts-mode . subword-mode))
+
+
+;; (with-eval-after-load 'lsp-mode
+;;   (add-to-list 'lsp-language-id-configuration '(".*\\.v$" . "vlang"))
+;;   (lsp-register-client
+;;    (make-lsp-client :new-connection (lsp-stdio-connection "v-analyzer")
+;;                     :activation-fn (lsp-activate-on "vlang")
+;;                     :server-id 'v-analyzer)))
+
+(use-package! jsdoc
+  :bind (:map js-ts-mode-map
+              ("C-c C-d" . jsdoc)))
+
+(use-package! js-ts-mode
+  :mode ("\\.js$"))
+
+(use-package! dart-mode
+  :bind (:map dart-mode-map
+              ("C-c C-c" . #'flutter-run-or-hot-reload))
+  :custom
+  (lsp-dart-flutter-widget-guides . nil)
+  (lsp-dart-flutter-outline-position-params
+   '((side . right)
+     (slot . 2)
+     (window-width . ,treemacs-width))))
+
+
+(global-so-long-mode nil)
+(global-org-modern-mode t)
+(use-package javascript-mode
+  :mode ("\\.jsp$"))
+
+;; (use-package! ultimate-js-mode
+;;   :mode ("\\.js$"))
+
+;; (setq auto-mode-alist (delete '("\\.js\\'" . rjsx-mode) auto-mode-alist))
+;; (add-to-list 'auto-mode-alist '("\\.js\\'" . js-ts-mode))
+
+
+(defun lsp-booster--advice-json-parse (old-fn &rest args)
+  "Try to parse bytecode instead of json."
+  (or
+   (when (equal (following-char) ?#)
+     (let ((bytecode (read (current-buffer))))
+       (when (byte-code-function-p bytecode)
+         (funcall bytecode))))
+   (apply old-fn args)))
+(advice-add (if (progn (require 'json)
+                       (fboundp 'json-parse-buffer))
+                'json-parse-buffer
+              'json-read)
+            :around
+            #'lsp-booster--advice-json-parse)
+
+(defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
+  "Prepend emacs-lsp-booster command to lsp CMD."
+  (let ((orig-result (funcall old-fn cmd test?)))
+    (if (and (not test?)                             ;; for check lsp-server-present?
+             (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
+             lsp-use-plists
+             (not (functionp 'json-rpc-connection))  ;; native json-rpc
+             (executable-find "emacs-lsp-booster"))
+        (progn
+          (when-let ((command-from-exec-path (executable-find (car orig-result))))  ;; resolve command from exec-path (in case not found in $PATH)
+            (setcar orig-result command-from-exec-path))
+          (message "Using emacs-lsp-booster for %s!" orig-result)
+          (cons "emacs-lsp-booster" orig-result))
+      orig-result)))
+(advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
+
+(use-package! flycheck-grammalecte
+  :init
+  (setq flycheck-grammalecte-report-apos nil
+        flycheck-grammalecte-report-esp nil
+        flycheck-grammalecte-report-nbsp nil
+        flycheck-grammalecte-report-grammar t
+        flycheck-grammalecte-report-spellcheck nil
+        flycheck-grammalecte-report-typo nil)
+  :config
+  (add-to-list 'flycheck-grammalecte-enabled-modes 'org-mode)
+  (grammalecte-download-grammalecte)
+  (flycheck-grammalecte-setup))
+
+(with-eval-after-load 'ox-latex
+  (add-to-list 'org-latex-classes
+               '("org-plain-latex"
+                 "\\documentclass{article}
+           [NO-DEFAULT-PACKAGES]
+           [PACKAGES]
+           [EXTRA]"
+                 ("\\section{%s}" . "\\section*{%s}")
+                 ("\\subsection{%s}" . "\\subsection*{%s}")
+                 ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                 ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                 ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
+
+(defun mc/toggle-cursor-at-point ()
+  "Add or remove a cursor at point."
+  (interactive)
+  (if multiple-cursors-mode
+      (message "Cannot toggle cursor at point while `multiple-cursors-mode' is active.")
+    (let ((existing (mc/fake-cursor-at-point)))
+      (if existing
+          (mc/remove-fake-cursor existing)
+        (mc/create-fake-cursor-at-point)))))
+
+(add-to-list 'mc/cmds-to-run-once 'mc/toggle-cursor-at-point)
+(add-to-list 'mc/cmds-to-run-once 'multiple-cursors-mode)
+
+(global-set-key (kbd "s-SPC") 'mc/toggle-cursor-at-point)
+(global-set-key (kbd "<C-S-return>") 'multiple-cursors-mode)
