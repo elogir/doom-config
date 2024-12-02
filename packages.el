@@ -30,3 +30,6 @@
 
 (package! persistent-scratch)
 (package! flycheck-grammalecte)
+(package! xterm-color)
+(package! move-text)
+(package! dape)

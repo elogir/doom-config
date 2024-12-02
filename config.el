@@ -7,11 +7,12 @@
 (setq org-directory "~/org/")
 (setq auth-sources '("~/.authinfo"))
 
-;; (load-theme 'doom-solarized-light t)
-(setq doom-theme nil)
+(load-theme 'doom-one t)
+;; (setq doom-theme nil)
 
 (winner-mode t)
 (global-visual-line-mode t)
+(global-auto-revert-mode t)
 
 (defun my-projectile-run-project (&optional prompt)
   (interactive "P")
@@ -41,6 +42,13 @@
       "C-c C-c" #'my-projectile-compile-project
       "C-c C-v" #'my-projectile-run-project)
 
+(map! :map v-mode-map
+      "C-c C-c" #'my-projectile-compile-project
+      "C-c C-v" #'my-projectile-run-project)
+
+(map! :map dart-mode-map
+      "C-c C-c" #'my-projectile-compile-project
+      "C-c C-v" #'my-projectile-run-project)
 
 (map! :map global-map
       :leader
@@ -56,6 +64,9 @@
               (doom/forward-to-last-non-comment-or-eol)))
 
 ;;; Packages
+
+(use-package ansi-color
+  :hook (compilation-filter . ansi-color-compilation-filter))
 
 (use-package! crux
   :bind (:map global-map
@@ -100,6 +111,7 @@
   :bind (:map lsp-mode-map
               ("M-RET" . #'lsp-execute-code-action))
   :custom
+  (lsp-signature-auto-activate t)
   (lsp-headerline-breadcrumb-enable t)
   (lsp-javascript-display-enum-member-value-hints t)
   (lsp-javascript-display-parameter-name-hints t)
@@ -129,12 +141,12 @@
   :hook (js-ts-mode . subword-mode))
 
 
-;; (with-eval-after-load 'lsp-mode
-;;   (add-to-list 'lsp-language-id-configuration '(".*\\.v$" . "vlang"))
-;;   (lsp-register-client
-;;    (make-lsp-client :new-connection (lsp-stdio-connection "v-analyzer")
-;;                     :activation-fn (lsp-activate-on "vlang")
-;;                     :server-id 'v-analyzer)))
+(with-eval-after-load 'lsp-mode
+  (add-to-list 'lsp-language-id-configuration '(v-mode . "vlang"))
+  (lsp-register-client
+   (make-lsp-client :new-connection (lsp-stdio-connection "v-analyzer")
+                    :activation-fn (lsp-activate-on "vlang")
+                    :server-id 'v-analyzer)))
 
 (use-package! jsdoc
   :bind (:map js-ts-mode-map
@@ -145,13 +157,11 @@
 
 (use-package! dart-mode
   :bind (:map dart-mode-map
-              ("C-c C-c" . #'flutter-run-or-hot-reload))
+              ("C-c C-c" . #'flutter-run-or-hot-reload)
+              ("C-c C-v" . #'flutter-hot-restart))
   :custom
-  (lsp-dart-flutter-widget-guides . nil)
-  (lsp-dart-flutter-outline-position-params
-   '((side . right)
-     (slot . 2)
-     (window-width . ,treemacs-width))))
+  (lsp-dart-flutter-widget-guides t)
+  (subword-mode t))
 
 
 (global-so-long-mode nil)
@@ -223,18 +233,22 @@
                  ("\\paragraph{%s}" . "\\paragraph*{%s}")
                  ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
 
-(defun mc/toggle-cursor-at-point ()
-  "Add or remove a cursor at point."
-  (interactive)
-  (if multiple-cursors-mode
-      (message "Cannot toggle cursor at point while `multiple-cursors-mode' is active.")
-    (let ((existing (mc/fake-cursor-at-point)))
-      (if existing
-          (mc/remove-fake-cursor existing)
-        (mc/create-fake-cursor-at-point)))))
+(require 'xterm-color)
+(setq compilation-environment '("TERM=xterm-256color"))
+(defun my/advice-compilation-filter (f proc string)
+  (funcall f proc (xterm-color-filter string)))
+(advice-add 'compilation-filter :around #'my/advice-compilation-filter)
 
-(add-to-list 'mc/cmds-to-run-once 'mc/toggle-cursor-at-point)
-(add-to-list 'mc/cmds-to-run-once 'multiple-cursors-mode)
+(use-package! move-text
+  :bind (:map global-map
+              ("M-p" . #'move-text-up)
+              ("M-n" . #'move-text-down)))
 
-(global-set-key (kbd "s-SPC") 'mc/toggle-cursor-at-point)
-(global-set-key (kbd "<C-S-return>") 'multiple-cursors-mode)
+(use-package! dape
+  :custom
+  (dape-buffer-window-arrangement 'right)
+  (dape-inlay-hints t)
+  (dape-cwd-fn 'projectile-project-root)
+  :config
+  (dape-breakpoint-global-mode)
+  (add-hook 'dape-display-source-hook 'pulse-momentary-highlight-one-line))
