@@ -33,3 +33,4 @@
 (package! xterm-color)
 (package! move-text)
 (package! dape)
+(package! ctrlf)

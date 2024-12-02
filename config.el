@@ -14,6 +14,9 @@
 (global-visual-line-mode t)
 (global-auto-revert-mode t)
 
+(use-package! ctrlf
+  :config (ctrlf-mode +1))
+
 (defun my-projectile-run-project (&optional prompt)
   (interactive "P")
   (let ((compilation-read-command
