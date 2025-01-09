@@ -100,6 +100,8 @@
   (push ".class" projectile-globally-ignored-file-suffixes))
 
 (use-package! company
+  :custom
+  (company-idle-delay nil)
   :bind (:map global-map
               (([remap complete-symbol] . #'company-complete)
                ("M-`" . #'company-complete))))
@@ -114,7 +116,7 @@
   :bind (:map lsp-mode-map
               ("M-RET" . #'lsp-execute-code-action))
   :custom
-  (lsp-signature-auto-activate t)
+  ;; (lsp-signature-auto-activate t)
   (lsp-headerline-breadcrumb-enable t)
   (lsp-javascript-display-enum-member-value-hints t)
   (lsp-javascript-display-parameter-name-hints t)
@@ -130,12 +132,15 @@
   (add-to-list 'projectile-project-root-files-bottom-up "BUILD"))
 
 (use-package! yasnippet
-  :hook ((lsp-mode . yas-minor-mode) (org-mode . yas-minor-mode))
-  :bind (:map yas-keymap
-	      ("C-c SPC" . #'yas-expand)
-              ("TAB" . #'yas-next-field))
+  :bind (:map global-map
+	 ("C-c SPC" . #'yas-expand)
+         ("C-c C-SPC" . #'yas-insert-snippet)
+         :map yas-keymap
+         ("TAB" . #'yas-next-field))
   :config
-  (yas-reload-all))
+  (yas-reload-all)
+  (yas-global-mode t))
+
 
 (use-package! rjsx-mode
   :hook (rjsx-mode . subword-mode))
@@ -210,18 +215,18 @@
       orig-result)))
 (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
 
-(use-package! flycheck-grammalecte
-  :init
-  (setq flycheck-grammalecte-report-apos nil
-        flycheck-grammalecte-report-esp nil
-        flycheck-grammalecte-report-nbsp nil
-        flycheck-grammalecte-report-grammar t
-        flycheck-grammalecte-report-spellcheck nil
-        flycheck-grammalecte-report-typo nil)
-  :config
-  (add-to-list 'flycheck-grammalecte-enabled-modes 'org-mode)
-  (grammalecte-download-grammalecte)
-  (flycheck-grammalecte-setup))
+;; (use-package! flycheck-grammalecte
+;;   :init
+;;   (setq flycheck-grammalecte-report-apos nil
+;;         flycheck-grammalecte-report-esp nil
+;;         flycheck-grammalecte-report-nbsp nil
+;;         flycheck-grammalecte-report-grammar t
+;;         flycheck-grammalecte-report-spellcheck nil
+;;         flycheck-grammalecte-report-typo nil)
+;;   :config
+;;   (add-to-list 'flycheck-grammalecte-enabled-modes 'org-mode)
+;;   (grammalecte-download-grammalecte)
+;;   (flycheck-grammalecte-setup))
 
 (with-eval-after-load 'ox-latex
   (add-to-list 'org-latex-classes
@@ -242,6 +247,10 @@
   (funcall f proc (xterm-color-filter string)))
 (advice-add 'compilation-filter :around #'my/advice-compilation-filter)
 
+(use-package! dart-mode
+  :config
+  (subword-mode))
+
 (use-package! move-text
   :bind (:map global-map
               ("M-p" . #'move-text-up)
@@ -255,3 +264,78 @@
   :config
   (dape-breakpoint-global-mode)
   (add-hook 'dape-display-source-hook 'pulse-momentary-highlight-one-line))
+
+(use-package! org
+  :custom
+  (org-return-follows-link t))
+
+(use-package! yasnippet-snippets
+  :after yasnippet
+  :ensure t)
+
+
+;; (defun remote-vterm ()
+;;   (interactive)
+;;   (vterm)
+;;   (vterm-send-string "ssh homeserver")
+;;   (vterm-send-return)
+;;   (vterm-clear))
+
+;; (defun new-remote-vterm ()
+;;   (interactive)
+;;   (let* ((buffer-name (generate-new-buffer-name "*vterm-homeserver*")))
+;;     (vterm buffer-name)
+;;     (vterm-send-string "ssh homeserver")
+;;     (vterm-send-return)
+;;     (vterm-clear)))
+
+;; (global-set-key (kbd "C-c C-o t") #'remote-vterm)
+;; (global-set-key (kbd "C-c C-o u") #'new-remote-vterm)
+
+(setq tramp-default-method "ssh")
+
+(use-package! vterm
+  :custom
+  (vterm-tramp-shells '(("ssh" "/bin/bash") ("docker" "/bin/sh"))))
+
+;; (use-package! eat
+;;   :custom
+;;   (eshell-visual-commands nil)
+;;   :config
+;;   (eat-eshell-mode))
+
+(use-package! gptel
+  :bind (:map global-map
+              ("C-c g r" . #'gptel-rewrite)
+              ("C-c g c" . #'gptel-add)
+              ("C-c g g" . #'gptel-menu))
+  :config
+  (add-hook 'gptel-post-stream-hook 'gptel-auto-scroll)
+  (add-hook 'gptel-post-response-functions 'gptel-end-of-response)
+  (setq
+   gptel-model   'claude-3-sonnet
+   gptel-backend (gptel-make-ollama "Kagi Assistant"
+                   :host "localhost:8089"
+                   :protocol "http"
+                   :endpoint "/completions"
+                   :stream nil
+                   :models '(claude-3-sonnet claude-3-opus claude-3-haiku gpt-4o-mini gpt-4o mistral-nemo mistral-large gemini-pro llama-3-70b llama-3-405b qwen-qwq-32b nova-lite nova-pro))))
+
+(use-package! gptel-quick
+  :bind (:map global-map
+              ("C-c g q" . #'gptel-quick))
+  :custom
+  (gptel-quick-timeout 30)
+  (gptel-quick-backend gptel-backend)
+  (gptel-quick-model 'gpt-4o-mini))
+
+(use-package! markdown-ts-mode
+  :mode ("\\.md\\'" . markdown-ts-mode)
+  :defer 't
+  :config
+  (add-to-list 'treesit-language-source-alist '(markdown "https://github.com/tree-sitter-grammars/tree-sitter-markdown" "split_parser" "tree-sitter-markdown/src"))
+  (add-to-list 'treesit-language-source-alist '(markdown-inline "https://github.com/tree-sitter-grammars/tree-sitter-markdown" "split_parser" "tree-sitter-markdown-inline/src")))
+
+(use-package! ultra-scroll
+  :config
+  (ultra-scroll-mode 1))

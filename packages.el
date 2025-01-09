@@ -29,8 +29,23 @@
 ;;            :repo "sogaiu/janet-ts-mode"))
 
 (package! persistent-scratch)
-(package! flycheck-grammalecte)
+;; (package! flycheck-grammalecte)
 (package! xterm-color)
 (package! move-text)
 (package! dape)
 (package! ctrlf)
+(package! yasnippet-snippets)
+(package! eat
+  :recipe (:host codeberg
+           :repo "akib/emacs-eat"
+           :files ("*.el" ("term" "term/*.el") "*.texi"
+                   "*.ti" ("terminfo/e" "terminfo/e/*")
+                   ("terminfo/65" "terminfo/65/*")
+                   ("integration" "integration/*")
+                   (:exclude ".dir-locals.el" "*-tests.el"))))
+(package! gptel)
+(package! gptel-quick :recipe (:host github :repo "karthink/gptel-quick"))
+(package! ement)
+(package! ultra-scroll :recipe (:host github :repo "jdtsmith/ultra-scroll"))
+;; (package! elysium :recipe (:host github :repo "lanceberge/elysium"))
+;; (package! gptel :recipe (:host github :repo "elogir/gptel" :no-byte-compile t))
