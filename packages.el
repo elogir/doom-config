@@ -47,5 +47,7 @@
 (package! gptel-quick :recipe (:host github :repo "karthink/gptel-quick"))
 (package! ement)
 (package! ultra-scroll :recipe (:host github :repo "jdtsmith/ultra-scroll"))
+(package! elfeed)
+(package! reddigg)
 ;; (package! elysium :recipe (:host github :repo "lanceberge/elysium"))
 ;; (package! gptel :recipe (:host github :repo "elogir/gptel" :no-byte-compile t))

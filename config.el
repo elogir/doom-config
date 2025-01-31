@@ -319,7 +319,7 @@
                    :protocol "http"
                    :endpoint "/completions"
                    :stream nil
-                   :models '(claude-3-sonnet claude-3-opus claude-3-haiku gpt-4o-mini gpt-4o mistral-nemo mistral-large gemini-pro llama-3-70b llama-3-405b qwen-qwq-32b nova-lite nova-pro))))
+                   :models '(claude-3-sonnet claude-3-opus claude-3-haiku gpt-4o-mini gpt-4o mistral-nemo mistral-large gemini-pro llama-3-70b llama-3-405b qwen-qwq-32b nova-lite nova-pro deepseek deepseek-r1))))
 
 (use-package! gptel-quick
   :bind (:map global-map
@@ -339,3 +339,7 @@
 (use-package! ultra-scroll
   :config
   (ultra-scroll-mode 1))
+
+(use-package! reddigg
+  :custom
+  (reddigg-subs '("emacs" "NoStupidQuestions" "FitnessFrance")))
