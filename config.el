@@ -174,15 +174,6 @@
 
 (global-so-long-mode nil)
 (global-org-modern-mode t)
-(use-package javascript-mode
-  :mode ("\\.jsp$"))
-
-;; (use-package! ultimate-js-mode
-;;   :mode ("\\.js$"))
-
-;; (setq auto-mode-alist (delete '("\\.js\\'" . rjsx-mode) auto-mode-alist))
-;; (add-to-list 'auto-mode-alist '("\\.js\\'" . js-ts-mode))
-
 
 (defun lsp-booster--advice-json-parse (old-fn &rest args)
   "Try to parse bytecode instead of json."
@@ -273,36 +264,11 @@
   :after yasnippet
   :ensure t)
 
-
-;; (defun remote-vterm ()
-;;   (interactive)
-;;   (vterm)
-;;   (vterm-send-string "ssh homeserver")
-;;   (vterm-send-return)
-;;   (vterm-clear))
-
-;; (defun new-remote-vterm ()
-;;   (interactive)
-;;   (let* ((buffer-name (generate-new-buffer-name "*vterm-homeserver*")))
-;;     (vterm buffer-name)
-;;     (vterm-send-string "ssh homeserver")
-;;     (vterm-send-return)
-;;     (vterm-clear)))
-
-;; (global-set-key (kbd "C-c C-o t") #'remote-vterm)
-;; (global-set-key (kbd "C-c C-o u") #'new-remote-vterm)
-
 (setq tramp-default-method "ssh")
 
 (use-package! vterm
   :custom
   (vterm-tramp-shells '(("ssh" "/bin/bash") ("docker" "/bin/sh"))))
-
-;; (use-package! eat
-;;   :custom
-;;   (eshell-visual-commands nil)
-;;   :config
-;;   (eat-eshell-mode))
 
 (use-package! gptel
   :bind (:map global-map
